@@ -1,0 +1,30 @@
+version: '3.8'
+services:
+  db:
+    image: postgres:13
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: odoo
+      POSTGRES_USER: odoo
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - db-data:/var/lib/postgresql/data
+
+  odoo:
+    build: .
+    image: odoo:17
+    restart: unless-stopped
+    depends_on:
+      - db
+    environment:
+      - DB_HOST=db
+      - DB_USER=odoo
+      - DB_PASSWORD=${DB_PASSWORD}
+      - ADMIN_PASSWD=${ADMIN_PASSWORD}
+    volumes:
+      - ./config/odoo.conf:/etc/odoo/odoo.conf:ro
+      - ./addons:/mnt/extra-addons
+    # no ports defined—Coolify handles proxy & routing
+
+volumes:
+  db-data:
